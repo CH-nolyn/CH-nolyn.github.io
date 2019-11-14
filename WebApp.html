@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>web</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=IZGWuA4tNUqGcgXesTagBsKlZh2KPrQl" ></script>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css.css">
+</head>
+<body>
+<div id="container" style="width: 1000px; height: 600px"></div>
+<div id="r-result"><p>请输入你要查询的地区:<p>(p.s:查询后点击图中图标获取详细信息)</p></p><input type="text" id="suggestId" size="20" value="百度" style="width:150px;" /></div>
+<div id="searchResultPanel" style="border:1px solid #C0C0C0;width:200px;height:auto; display:none;"></div>
+
+
+<script >
+
+    function G(id) {
+        return document.getElementById(id);
+    }
+
+    var map = new BMap.Map("container",{ enableMapClick: false });
+    // 创建地图实例
+    var point = new BMap.Point(116.404, 39.915);
+    console.log('point: '+point)
+    // 创建点坐标
+        map.centerAndZoom(point, 8);
+         map.enableScrollWheelZoom();
+         map.enableContinuousZoom();    // 开启连续缩放效果
+        map.enableInertialDragging();　// 开启惯性拖拽效果
+
+    var marker = new BMap.Marker(point);  // 创建标注
+    map.addOverlay(marker);               // 将标注添加到地图中
+    marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+
+    var ac = new BMap.Autocomplete(    //建立一个自动完成的对象
+        {"input" : "suggestId"
+            ,"location" : map
+        });
+
+    ac.addEventListener("onhighlight", function(e) {  //鼠标放在下拉列表上的事件
+        var str = "";
+        var _value = e.fromitem.value;
+        var value = "";
+        if (e.fromitem.index > -1) {
+            value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+        }
+
+        str = "FromItem<br />index = " + e.fromitem.index + "<br />value = " + value;
+
+        value = "";
+        if (e.toitem.index > -1) {
+            _value = e.toitem.value;
+            value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+        }
+        str += "<br />ToItem<br />index = " + e.toitem.index + "<br />value = " + value;
+        G("searchResultPanel").innerHTML = str;
+    });
+
+    var s = null;
+    var ss = null;
+    var myValue;
+
+    ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
+        var _value = e.item.value;
+        console.log(_value.city);
+        console.log(e);
+        console.log(_value.district);
+        myValue = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+        G("searchResultPanel").innerHTML ="onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+
+        s =  (_value.district).substring(0,(_value.district).length-1);
+        marker = _value.district.substring((0,(_value.district).length-1));
+
+        console.log("s: "+s);
+        ss = '?version=v1&city=' + s + '&appid=[48558192]&appsecret=[pmokHc3H]';
+        setPlace();
+    });
+
+    var pp;
+    var marker2;
+    function setPlace(){
+        map.clearOverlays();    //清除地图上所有覆盖物
+
+        function myFun(){
+             pp = local.getResults().getPoi(0).point;    //获取第一个智能搜索的结果
+            map.centerAndZoom(pp, 18);
+            console.log("pp:  "+JSON.stringify(pp));
+            marker = new BMap.Marker(pp);
+            marker2 = new BMap.Marker(pp);
+            map.addOverlay(marker2);    //添加标
+
+            var opts = {
+                width : 500,     // 信息窗口宽度
+                height: 150,     // 信息窗口高度
+            }
+
+            function cc() {
+                $.ajax({
+                    type: 'GET',
+                    url: 'https://www.tianqiapi.com/api/',
+                    data: ss,
+                    dataType: 'JSON',
+                    error: function() {
+                        console.log("chucuole")
+                    },
+                    success: function (res) {
+                        console.log(res)
+                        console.log("sssss"+s)
+                       var weatherText =
+                           "<iframe scrolling=\"no\" src=\"https://tianqiapi.com/api.php?style=tj&city="+s+
+                           "&skin=pitaya\" frameborder=\"0\" width=\"500\" height=\"62\" allowtransparency=\"true\"></iframe><br>"
+                            + " <br><div> 日期 : " +res["data"][0]["day"]+"</div><br>"
+                            + " <div> 穿衣指数 : "+res["data"][0]["index"][3]["desc"]+"</div>";
+                        var infoWindow = new BMap.InfoWindow(weatherText, opts);
+
+                        marker2.addEventListener("click", function(){
+                            map.openInfoWindow(infoWindow,pp); //开启信息窗口
+                        });
+                    },
+                })
+            }
+            cc();
+        }
+        var local = new BMap.LocalSearch(map, { //智能搜索
+            onSearchComplete: myFun
+        });
+        local.search(myValue);
+    }
+
+
+
+</script>
+</body>
+</html>
