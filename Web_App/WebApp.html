@@ -24,10 +24,10 @@
     var point = new BMap.Point(116.404, 39.915);
     console.log('point: '+point)
     // 创建点坐标
-        map.centerAndZoom(point, 8);
-         map.enableScrollWheelZoom();
-         map.enableContinuousZoom();    // 开启连续缩放效果
-        map.enableInertialDragging();　// 开启惯性拖拽效果
+    map.centerAndZoom(point, 8);
+    map.enableScrollWheelZoom();
+    map.enableContinuousZoom();    // 开启连续缩放效果
+    map.enableInertialDragging();　// 开启惯性拖拽效果
 
     var marker = new BMap.Marker(point);  // 创建标注
     map.addOverlay(marker);               // 将标注添加到地图中
@@ -83,7 +83,7 @@
         map.clearOverlays();    //清除地图上所有覆盖物
 
         function myFun(){
-             pp = local.getResults().getPoi(0).point;    //获取第一个智能搜索的结果
+            pp = local.getResults().getPoi(0).point;    //获取第一个智能搜索的结果
             map.centerAndZoom(pp, 18);
             console.log("pp:  "+JSON.stringify(pp));
             marker = new BMap.Marker(pp);
@@ -107,9 +107,9 @@
                     success: function (res) {
                         console.log(res)
                         console.log("sssss"+s)
-                       var weatherText =
-                           "<iframe scrolling=\"no\" src=\"https://tianqiapi.com/api.php?style=tj&city="+s+
-                           "&skin=pitaya\" frameborder=\"0\" width=\"500\" height=\"62\" allowtransparency=\"true\"></iframe><br>"
+                        var weatherText =
+                            "<iframe scrolling=\"no\" src=\"https://tianqiapi.com/api.php?style=tj&city="+s+
+                            "&skin=pitaya\" frameborder=\"0\" width=\"500\" height=\"62\" allowtransparency=\"true\"></iframe><br>"
                             + " <br><div> 日期 : " +res["data"][0]["day"]+"</div><br>"
                             + " <div> 穿衣指数 : "+res["data"][0]["index"][3]["desc"]+"</div>";
                         var infoWindow = new BMap.InfoWindow(weatherText, opts);
@@ -127,8 +127,6 @@
         });
         local.search(myValue);
     }
-
-
 
 </script>
 </body>
